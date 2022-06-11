@@ -12,6 +12,7 @@ import ARKit
 class ViewController: UIViewController, ARSCNViewDelegate {
     
     @IBOutlet var sceneView: ARSCNView!
+    var diceArray = [SCNNode]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,7 +27,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = .vertical
+        configuration.planeDetection = .horizontal
         
         // Run the view's session
         sceneView.session.run(configuration)
@@ -57,12 +58,32 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         y: hitResult.simdWorldCoordinates.y + diceNode.boundingSphere.radius,
                         z: hitResult.simdWorldCoordinates.z
                     )
+                    
+                    diceArray.append(diceNode)
+                    
                     sceneView.scene.rootNode.addChildNode(diceNode)
+                    
+                    roll(dice: diceNode)
                 }
             }
         }
     }
     
+    func rollAll() {
+        if diceArray.isEmpty == false {
+            for dice in diceArray {
+                roll(dice: dice)
+            }
+        }
+    }
+    
+    func roll(dice: SCNNode) {
+        let randomX = (Float(arc4random_uniform(4)) + 1) * Float.pi/2
+        
+        dice.runAction(
+            SCNAction.rotate(by: CGFloat(randomX * 5), around: dice.worldRight , duration: 0.5)
+        )
+    }
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         if anchor is ARPlaneAnchor {
             
